@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 
 from src.api.router import router
+from src.core.exception_handlers import add_exception_handlers
 
 
 app = FastAPI(
     title="Insightia",
 )
 app.include_router(router)
+add_exception_handlers(app)
 
 
 @app.get("/")
