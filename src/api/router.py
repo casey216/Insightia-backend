@@ -1,16 +1,27 @@
 from fastapi import APIRouter, HTTPException, Query
 
+from src.services.genderize import fetch_name_data
+
 
 router = APIRouter(prefix="/api")
 
 
 @router.get("/classify")
-def get_name_details(name: str = Query(None)):
+async def get_name_details(name: str = Query(None)):
     if not name or name.strip() == "":
-        raise HTTPException(400, "Missing or empty name")
+        raise HTTPException(
+            status_code=400, 
+            detail="Missing or empty name")
     
-    name = name.strip()
+    try:
+        data = fetch_name_data(name.strip())
+        return {
+            "status": "success",
+            "data": data
+        }
     
-    return {
-        "name": name
-    }
+    except Exception:
+        raise HTTPException(
+            status_code=502,
+            detail="External API Error"
+        )
