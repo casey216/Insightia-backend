@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from src.core.exceptions import ExternalApiError
+
 
 def add_exception_handlers(app: FastAPI):
     @app.exception_handler(HTTPException)
@@ -12,4 +14,14 @@ def add_exception_handlers(app: FastAPI):
                 "message": exc.detail
             }
         )
+
     
+    @app.exception_handler(ExternalApiError)
+    def external_api_error_handler(request: Request, exc: ExternalApiError):
+        return JSONResponse(
+            status_code=502,
+            content={
+                "status": "error",
+                "message": exc.detail
+            }
+        )

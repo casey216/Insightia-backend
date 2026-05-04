@@ -1,5 +1,7 @@
 import requests
 
+from src.core.exceptions import ExternalApiError
+
 
 GENDERIZE_URL = "https://api.genderize.io"
 
@@ -14,6 +16,6 @@ def fetch_name_data(name: str) -> requests.Response:
     )
 
     if response.status_code != 200:
-        raise Exception("API Failure")
+        raise ExternalApiError()
     
     return response.json()
