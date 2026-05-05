@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from src.services.genderize import fetch_name_data
+from src.utils.helpers import process_genderize_response
 
 
 router = APIRouter(prefix="/api")
@@ -13,8 +14,10 @@ async def get_name_details(name: str = Query(None)):
             status_code=400, 
             detail="Missing or empty name")
     
-    data = fetch_name_data(name.strip())
+    raw_data = fetch_name_data(name.strip())
+
+    processed_data = process_genderize_response(raw_data)
     return {
         "status": "success",
-        "data": data
+        "data": processed_data
     }

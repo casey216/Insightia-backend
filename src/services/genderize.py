@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 
 from src.core.exceptions import ExternalApiError
@@ -6,7 +8,7 @@ from src.core.exceptions import ExternalApiError
 GENDERIZE_URL = "https://api.genderize.io"
 
 
-def fetch_name_data(name: str) -> requests.Response:
+def fetch_name_data(name: str) -> dict[str, Any]:
     try:
         response = requests.get(
             url=GENDERIZE_URL,
