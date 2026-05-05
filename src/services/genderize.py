@@ -7,15 +7,20 @@ GENDERIZE_URL = "https://api.genderize.io"
 
 
 def fetch_name_data(name: str) -> requests.Response:
-    response = requests.get(
-        url=GENDERIZE_URL,
-        params={
-            "name": name
-        },
-        timeout=2.0
-    )
-
-    if response.status_code != 200:
-        raise ExternalApiError()
+    try:
+        response = requests.get(
+            url=GENDERIZE_URL,
+            params={
+                "name": name
+            },
+            timeout=2.0
+        )
+        response.raise_for_status()
     
-    return response.json()
+    except requests.exceptions.RequestException as e:
+        raise ExternalApiError() from e
+    
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError as e:
+        raise ExternalApiError() from e
