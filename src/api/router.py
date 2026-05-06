@@ -19,7 +19,7 @@ async def get_name_details(name: str = Query(..., min_length=1)):
 
     if raw_data.get("gender") is None or raw_data.get("count") == 0:
         raise HTTPException(
-            status_code=502,
+            status_code=400,
             detail="No prediction available for the provided name"
         )
 
