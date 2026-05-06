@@ -15,7 +15,7 @@ async def get_name_details(name: str = Query(..., min_length=1)):
             status_code=400, 
             detail="Name cannot be empty")
     
-    raw_data = fetch_name_data(name)
+    raw_data = await fetch_name_data(name)
 
     if raw_data.get("gender") is None or raw_data.get("count") == 0:
         raise HTTPException(

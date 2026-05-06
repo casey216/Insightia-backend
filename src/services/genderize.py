@@ -1,6 +1,6 @@
 from typing import Any
 
-import requests
+import httpx
 
 from src.core.exceptions import ExternalApiError
 
@@ -8,21 +8,24 @@ from src.core.exceptions import ExternalApiError
 GENDERIZE_URL = "https://api.genderize.io"
 
 
-def fetch_name_data(name: str) -> dict[str, Any]:
+async def fetch_name_data(name: str) -> dict[str, Any]:
     try:
-        response = requests.get(
-            url=GENDERIZE_URL,
-            params={
-                "name": name
-            },
-            timeout=2.0
-        )
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            response = await client.get(
+                url=GENDERIZE_URL,
+                params={
+                    "name": name
+                },
+            )
         response.raise_for_status()
+        
+    except httpx.RequestError as e:
+        raise ExternalApiError() from e
     
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPStatusError as e:
         raise ExternalApiError() from e
     
     try:
         return response.json()
-    except requests.exceptions.JSONDecodeError as e:
+    except ValueError as e:
         raise ExternalApiError() from e
