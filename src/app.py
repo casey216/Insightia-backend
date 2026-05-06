@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import router
 from src.core.exception_handlers import add_exception_handlers
+from src.core.middleware import EmptyNameMiddleware
 
 
 app = FastAPI(
     title="Insightia",
 )
 
+app.add_middleware(EmptyNameMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -13,7 +13,7 @@ async def get_name_details(name: str = Query(..., min_length=1)):
     if name == "":
         raise HTTPException(
             status_code=400, 
-            detail="Name cannot be empty")
+            detail="Missing or empty name")
     
     raw_data = await fetch_name_data(name)
 
