@@ -10,7 +10,7 @@ class EmptyNameMiddleware(BaseHTTPMiddleware):
         if request.url.path == "/api/classify":
             name = request.query_params.get("name")
 
-            if name is None:
+            if name is None or name.strip() == "":
                 return JSONResponse(
                     status_code=400,
                     content={

@@ -9,13 +9,7 @@ router = APIRouter(prefix="/api")
 
 @router.get("/classify")
 async def get_name_details(name: str = Query(..., min_length=1)):
-    name = name.strip()
-    if name == "":
-        raise HTTPException(
-            status_code=400, 
-            detail="Missing or empty name")
-    
-    raw_data = await fetch_name_data(name)
+    raw_data = await fetch_name_data(name.strip())
 
     if raw_data.get("gender") is None or raw_data.get("count") == 0:
         raise HTTPException(
