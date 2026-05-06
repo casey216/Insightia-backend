@@ -8,13 +8,19 @@ router = APIRouter(prefix="/api")
 
 
 @router.get("/classify")
-async def get_name_details(name: str = Query(None)):
+async def get_name_details(name: str = Query(..., min_length=1)):
     if not name or name.strip() == "":
         raise HTTPException(
             status_code=400, 
             detail="Missing or empty name")
     
     raw_data = fetch_name_data(name.strip())
+
+    if raw_data.get("gender") is None or raw_data.get("count") == 0:
+        raise HTTPException(
+            status_code=502,
+            detail="No prediction available for the provided name"
+        )
 
     processed_data = process_genderize_response(raw_data)
     return {
