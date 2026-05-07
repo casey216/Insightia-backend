@@ -1,13 +1,30 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.router import router
+from src.db import database as db_module
 from src.core.exception_handlers import add_exception_handlers
 from src.core.middleware import EmptyNameMiddleware
+from src.core.settings import settings
+from src.models.profile import Profile
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if not settings.TESTING:
+        db_module.init_db()
+        db_module.Base.metadata.create_all(bind=db_module.engine)
+
+    yield
+
 
 
 app = FastAPI(
-    title="Insightia",
+    title=settings.API_NAME,
+    version=settings.API_VERSION,
+    lifespan=lifespan,
 )
 
 app.add_middleware(EmptyNameMiddleware)
