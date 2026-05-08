@@ -45,7 +45,7 @@ def process_nationalize_response(data: dict[str, Any]) -> dict[str, Any]:
     country: dict = data.get("country", [])[0]
 
     return {
-        "country_id": country.get("country_id"),
+        "country_id": country.get("country_id", "").upper(),
         "country_probability": round(country.get("probability", 0), 2)
     }
 

@@ -1,9 +1,11 @@
+import typing
 import uuid
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 
 from src.core.exceptions import InvalidIdError, ProfileNotFoundError
 from src.models.profile import Profile
+from src.schemas.profile import FilterParams
 from src.services.agify import fetch_agify_data
 from src.services.genderize import fetch_genderize_data
 from src.services.nationalize import fetch_nationalize_data
@@ -49,3 +51,50 @@ class ProfileService:
         db_profile = ProfileService.get_profile_by_id(id, db)
         db.delete(db_profile)
         db.commit()
+
+
+    @staticmethod
+    def get_all_profiles(filter_params: FilterParams, db: Session) -> dict[str, typing.Any]:
+        q = QueryBuilder(db.query(Profile))
+        q = q.filter_by_age(filter_params.age)
+        q = q.filter_by_country(filter_params.country_id)
+        q = q.filter_by_gender(filter_params.gender)
+        q = q.build()
+
+        count = q.count()
+        profiles = [
+            profile.to_dict()
+            for profile in q.all()
+        ]
+
+        return {
+            "total": count,
+            "data": profiles
+        }
+
+
+class QueryBuilder:
+    def __init__(self, query: Query[Profile]) -> None:
+        self.query = query
+
+
+    def filter_by_gender(self, gender: str | None):
+        if gender:
+            self.query = self.query.filter(Profile.gender == gender.lower())
+        return self
+
+
+    def filter_by_age(self, age: int | None):
+        if age:
+            self.query = self.query.filter(Profile.age == age)
+        return self
+
+
+    def filter_by_country(self, country_id: str | None):
+        if country_id:
+            self.query = self.query.filter(Profile.country_id == country_id.upper())
+        return self
+
+
+    def build(self) -> Query[Profile]:
+        return self.query

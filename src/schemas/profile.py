@@ -1,4 +1,9 @@
-from pydantic import BaseModel
+from typing import Literal, Annotated
+
+from pydantic import BaseModel, BeforeValidator
+
+
+Gender = Annotated[Literal["male", "female"], BeforeValidator(lambda x: x.lower())]
 
 
 class ProfileData(BaseModel):
@@ -28,3 +33,9 @@ class ProfileCreate(BaseModel):
     age_group: str
     country_id: str
     country_probability: float
+
+
+class FilterParams(BaseModel):
+    gender: Gender | None = None
+    age: int | None = None
+    country_id: str | None = None
