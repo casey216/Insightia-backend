@@ -19,3 +19,28 @@ def process_genderize_response(data: dict[str, Any]) -> dict[str, Any]:
         "processed_at": datetime.now(timezone.utc)
             .strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
+
+
+def classify_age_group(age: int | None) -> str:
+    if age is None or age < 0:
+        return "Invalid age"
+    
+    if age >= 0 and age < 13:
+        return "child"
+    
+    if age < 20:
+        return "teenager"
+    
+    if age < 60:
+        return "adult"
+    
+    return "senior"
+
+
+def process_agify_response(data: dict[str, Any]) -> dict[str, Any]:
+    age = data.get("age")
+
+    return {
+        "age": age,
+        "age_group": classify_age_group(age)
+    }
