@@ -42,3 +42,10 @@ class ProfileService:
         except ValueError as e:
             raise InvalidIdError
         return db_profile
+    
+
+    @staticmethod
+    def delete_profile(id: str, db: Session) -> None:
+        db_profile = ProfileService.get_profile_by_id(id, db)
+        db.delete(db_profile)
+        db.commit()

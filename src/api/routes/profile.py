@@ -33,3 +33,9 @@ async def get_profile(id: str, db: Annotated[Session, Depends(get_db)]):
         "status": "success",
         "data": profile.to_dict()
     }
+
+
+@router.delete("/id", status_code=204)
+async def delete_profile(id: str, db: Annotated[Session, Depends(get_db)]):
+    ProfileService.delete_profile(id, db)
+    return
