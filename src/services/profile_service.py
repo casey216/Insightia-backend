@@ -1,7 +1,9 @@
+import uuid
+
 from sqlalchemy.orm import Session
 
+from src.core.exceptions import InvalidIdError, ProfileNotFoundError
 from src.models.profile import Profile
-from src.schemas.profile import ProfileCreate
 from src.services.agify import fetch_agify_data
 from src.services.genderize import fetch_genderize_data
 from src.services.nationalize import fetch_nationalize_data
@@ -28,4 +30,15 @@ class ProfileService:
         db.commit()
         db.refresh(db_profile)
 
+        return db_profile
+    
+
+    @staticmethod
+    def get_profile_by_id(id: str, db: Session) -> Profile:
+        try:
+            db_profile = db.query(Profile).filter_by(id=uuid.UUID(id)).first()
+            if db_profile is None:
+                raise ProfileNotFoundError()
+        except ValueError as e:
+            raise InvalidIdError
         return db_profile

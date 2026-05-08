@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Body, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
@@ -20,4 +22,14 @@ async def create_profile(
     return {
         "status": "success",
         "data": processed_data.to_dict()
+    }
+
+
+@router.get("/{id}", response_model=ProfileOut, status_code=200)
+async def get_profile(id: str, db: Annotated[Session, Depends(get_db)]):
+    profile = ProfileService.get_profile_by_id(id, db)
+
+    return {
+        "status": "success",
+        "data": profile.to_dict()
     }
