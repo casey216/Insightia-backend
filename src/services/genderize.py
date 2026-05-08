@@ -8,7 +8,7 @@ from src.core.exceptions import ExternalApiError
 GENDERIZE_URL = "https://api.genderize.io"
 
 
-async def fetch_name_data(name: str) -> dict[str, Any]:
+async def fetch_genderize_data(name: str) -> dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
             response = await client.get(

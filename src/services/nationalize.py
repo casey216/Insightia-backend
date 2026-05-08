@@ -8,7 +8,7 @@ from src.core.exceptions import ExternalApiError
 NATIONALIZE_URL = "https://api.nationalize.io"
 
 
-async def fetch_name_data(name: str) -> dict[str, Any]:
+async def fetch_nationalize_data(name: str) -> dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
             response = await client.get(

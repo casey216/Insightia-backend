@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.router import router
+from src.api.routes.profile import router
 from src.db import database as db_module
 from src.core.exception_handlers import add_exception_handlers
 from src.core.middleware import EmptyNameMiddleware

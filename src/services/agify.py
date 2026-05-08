@@ -8,7 +8,7 @@ from src.core.exceptions import ExternalApiError
 AGIFY_URL = "https://api.agify.io"
 
 
-async def fetch_name_data(name: str) -> dict[str, Any]:
+async def fetch_agify_data(name: str) -> dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
             response = await client.get(

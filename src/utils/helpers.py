@@ -1,23 +1,18 @@
 from datetime import datetime, timezone
 from typing import Any
 
+from uuid_extensions import uuid7
+
 
 def process_genderize_response(data: dict[str, Any]) -> dict[str, Any]:
-    name: str = data.get("name", "")
     gender: str = data.get("gender", "")
-    gender_probability: float = data.get("probability", 0)
+    gender_probability: float = round(data.get("probability", 0),2)
     sample_size: int = data.get("count", 0)
 
-    is_confident: bool = (gender_probability >= 0.7) and (sample_size >=100)
-
     return {
-        "name": name.lower(),
         "gender": gender,
         "gender_probability": gender_probability,
         "sample_size": sample_size,
-        "is_confident": is_confident,
-        "processed_at": datetime.now(timezone.utc)
-            .strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
 
@@ -51,5 +46,20 @@ def process_nationalize_response(data: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "country_id": country.get("country_id"),
-        "country_probability": country.get("probability")
+        "country_probability": round(country.get("probability", 0), 2)
     }
+
+
+def process_responses(name: str, agify_data: dict, genderize_data: dict, nationalize_data: dict) -> dict[str, Any]:
+    result = {
+        "name": name,
+        "id": str(uuid7()),
+        "created_at": str(datetime.now(timezone.utc)
+        .strftime("%Y-%m-%dT%H:%M:%SZ"))
+        }
+
+    result.update(process_genderize_response(genderize_data))
+    result.update(process_agify_response(agify_data))
+    result.update(process_nationalize_response(nationalize_data))
+
+    return result
