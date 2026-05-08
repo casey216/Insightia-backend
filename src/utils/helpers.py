@@ -53,9 +53,6 @@ def process_nationalize_response(data: dict[str, Any]) -> dict[str, Any]:
 def process_responses(name: str, agify_data: dict, genderize_data: dict, nationalize_data: dict) -> dict[str, Any]:
     result = {
         "name": name,
-        "id": str(uuid7()),
-        "created_at": str(datetime.now(timezone.utc)
-        .strftime("%Y-%m-%dT%H:%M:%SZ"))
         }
 
     result.update(process_genderize_response(genderize_data))

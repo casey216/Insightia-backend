@@ -1,37 +1,23 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, Body, Depends
+from sqlalchemy.orm import Session
 
+from src.db.database import get_db
 from src.schemas.profile import ProfileOut
-from src.services.agify import fetch_agify_data
-from src.services.genderize import fetch_genderize_data
-from src.services.nationalize import fetch_nationalize_data
-from src.utils.helpers import process_responses
+from src.services.profile_service import ProfileService
 
 
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])
 
 
-@router.post("/", response_model=ProfileOut, status_code=200)
-async def get_name_details(name: str = Body(..., min_length=1, embed=True)):
+@router.post("/", response_model=ProfileOut, status_code=201)
+async def create_profile(
+            name: str = Body(..., min_length=1, embed=True),
+            db: Session = Depends(get_db),
+
+):
     name = name.strip().lower()
-
-    agify_data = await fetch_agify_data(name)
-    genderize_data = await fetch_genderize_data(name)
-    nationalize_data = await fetch_nationalize_data(name)
-
-    if genderize_data.get("gender") is None or genderize_data.get("count") == 0:
-        raise HTTPException(
-            status_code=400,
-            detail="No prediction available for the provided name"
-        )
-
-    processed_data = process_responses(
-        name,
-        agify_data,
-        genderize_data,
-        nationalize_data
-    )
-
+    processed_data = await ProfileService.create_profile(name, db)
     return {
         "status": "success",
-        "data": processed_data
+        "data": processed_data.to_dict()
     }

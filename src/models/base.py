@@ -24,6 +24,7 @@ class ModelMixin:
             return value.strftime(
                 "%Y-%m-%dT%H:%M:%SZ"
             )
+        return value
         
 
     def __repr__(self) -> str:
