@@ -44,3 +44,12 @@ def process_agify_response(data: dict[str, Any]) -> dict[str, Any]:
         "age": age,
         "age_group": classify_age_group(age)
     }
+
+
+def process_nationalize_response(data: dict[str, Any]) -> dict[str, Any]:
+    country: dict = data.get("country", [])[0]
+
+    return {
+        "country_id": country.get("country_id"),
+        "country_probability": country.get("probability")
+    }
