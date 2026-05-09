@@ -18,6 +18,7 @@ async def fetch_genderize_data(name: str) -> dict[str, Any]:
                 },
             )
         response.raise_for_status()
+        return response.json()
         
     except httpx.RequestError as e:
         raise ExternalApiError() from e
@@ -25,7 +26,5 @@ async def fetch_genderize_data(name: str) -> dict[str, Any]:
     except httpx.HTTPStatusError as e:
         raise ExternalApiError() from e
     
-    try:
-        return response.json()
     except ValueError as e:
         raise ExternalApiError() from e

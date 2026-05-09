@@ -21,6 +21,7 @@ class ProfileData(BaseModel):
 
 class ProfileOut(BaseModel):
     status: str
+    message: str | None = None
     data: ProfileData
 
 

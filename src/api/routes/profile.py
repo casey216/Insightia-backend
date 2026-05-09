@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
@@ -11,7 +11,7 @@ from src.services.profile_service import ProfileService
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])
 
 
-@router.post("/", response_model=ProfileOut, status_code=201)
+@router.post("/", response_model=ProfileOut, status_code=201, response_model_exclude_none=True)
 async def create_profile(
             name: str = Body(..., min_length=1, embed=True),
             db: Session = Depends(get_db),
@@ -19,10 +19,9 @@ async def create_profile(
 ):
     name = name.strip().lower()
     processed_data = await ProfileService.create_profile(name, db)
-    return {
-        "status": "success",
-        "data": processed_data.to_dict()
-    }
+    response = {"status": "success"}
+    response.update(processed_data)
+    return response
 
 
 @router.get("/{id}", response_model=ProfileOut, status_code=200)

@@ -16,7 +16,14 @@ class ProfileService:
     """Service layer business logic for profiles."""
 
     @staticmethod
-    async def create_profile(name: str, db: Session) -> Profile:
+    async def create_profile(name: str, db: Session) -> dict[str, typing.Any]:
+        db_profile = db.query(Profile).filter(Profile.name == name).first()
+        if db_profile:
+            return {
+                "message": "Profile already exists",
+                "data": db_profile.to_dict()
+            }
+        
         agify_data = await fetch_agify_data(name)
         genderize_data = await fetch_genderize_data(name)
         nationalize_data = await fetch_nationalize_data(name)
@@ -32,7 +39,7 @@ class ProfileService:
         db.commit()
         db.refresh(db_profile)
 
-        return db_profile
+        return {"data": db_profile.to_dict()}
     
 
     @staticmethod
