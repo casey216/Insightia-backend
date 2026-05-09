@@ -13,9 +13,8 @@ from src.models.profile import Profile
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not settings.TESTING:
-        db_module.init_db()
-        db_module.Base.metadata.create_all(bind=db_module.engine)
+    db_module.init_db()
+    db_module.Base.metadata.create_all(bind=db_module.engine)
 
     yield
 

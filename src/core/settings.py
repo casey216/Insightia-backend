@@ -21,7 +21,6 @@ class Settings(BaseSettings):
 
     # Environment Variable
     ENV: str = "development"
-    TESTING: bool = False
 
     # DB config
     DB_TYPE: str = ""
