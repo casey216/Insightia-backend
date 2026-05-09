@@ -3,11 +3,11 @@ class ExternalApiError(Exception):
     Raised when an external API request fails or returns an invalid response.
 
     Args:
-        detail: Description of the API failure.
+        name: Name of the external API.
     """
 
-    def __init__(self, detail: str = "External API Error!") -> None:
-        self.detail = detail
+    def __init__(self, name: str = "External API") -> None:
+        self.detail = f"{name} returned an invalid response."
 
 
 class InvalidIdError(Exception):

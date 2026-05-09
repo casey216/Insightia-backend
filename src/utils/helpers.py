@@ -1,13 +1,15 @@
-from datetime import datetime, timezone
 from typing import Any
 
-from uuid_extensions import uuid7
+from src.core.exceptions import ExternalApiError
 
 
 def process_genderize_response(data: dict[str, Any]) -> dict[str, Any]:
     gender: str = data.get("gender", "")
     gender_probability: float = round(data.get("probability", 0),2)
     sample_size: int = data.get("count", 0)
+
+    if gender == "" or sample_size == 0:
+        raise ExternalApiError("Genderize")
 
     return {
         "gender": gender,
@@ -16,8 +18,8 @@ def process_genderize_response(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def classify_age_group(age: int | None) -> str:
-    if age is None or age < 0:
+def classify_age_group(age: int) -> str:
+    if age < 0:
         return "Invalid age"
     
     if age >= 0 and age < 13:
@@ -35,6 +37,9 @@ def classify_age_group(age: int | None) -> str:
 def process_agify_response(data: dict[str, Any]) -> dict[str, Any]:
     age = data.get("age")
 
+    if not age:
+        raise ExternalApiError("Agify")
+
     return {
         "age": age,
         "age_group": classify_age_group(age)
@@ -42,7 +47,10 @@ def process_agify_response(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def process_nationalize_response(data: dict[str, Any]) -> dict[str, Any]:
-    country: dict = data.get("country", [])[0]
+    try:
+        country: dict = data.get("country", [])[0]
+    except IndexError:
+        raise ExternalApiError("Nationalize")
 
     return {
         "country_id": country.get("country_id", "").upper(),
