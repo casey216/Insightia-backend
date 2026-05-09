@@ -23,11 +23,11 @@ class ProfileService:
         nationalize_data = await fetch_nationalize_data(name)
 
         processed_data = process_responses(
-        name,
-        agify_data,
-        genderize_data,
-        nationalize_data
-    )
+            name,
+            agify_data,
+            genderize_data,
+            nationalize_data
+        )
         db_profile = Profile(**processed_data)
 
         try:
