@@ -2,8 +2,9 @@ import typing
 import uuid
 
 from sqlalchemy.orm import Session, Query
+from sqlalchemy.exc import IntegrityError
 
-from src.core.exceptions import InvalidIdError, ProfileNotFoundError
+from src.core.exceptions import InvalidIdError, ProfileNotFoundError, DuplicateResourceError
 from src.models.profile import Profile
 from src.schemas.profile import FilterParams
 from src.services.agify import fetch_agify_data
@@ -16,14 +17,7 @@ class ProfileService:
     """Service layer business logic for profiles."""
 
     @staticmethod
-    async def create_profile(name: str, db: Session) -> dict[str, typing.Any]:
-        db_profile = db.query(Profile).filter(Profile.name == name).first()
-        if db_profile:
-            return {
-                "message": "Profile already exists",
-                "data": db_profile.to_dict()
-            }
-        
+    async def create_profile(name: str, db: Session) -> Profile:
         agify_data = await fetch_agify_data(name)
         genderize_data = await fetch_genderize_data(name)
         nationalize_data = await fetch_nationalize_data(name)
@@ -35,11 +29,15 @@ class ProfileService:
         nationalize_data
     )
         db_profile = Profile(**processed_data)
-        db.add(db_profile)
-        db.commit()
-        db.refresh(db_profile)
 
-        return {"data": db_profile.to_dict()}
+        try:
+            db.add(db_profile)
+            db.commit()
+            db.refresh(db_profile)
+            return db_profile
+        except IntegrityError:
+            db.rollback()
+            raise DuplicateResourceError("Profile")
     
 
     @staticmethod
@@ -51,6 +49,11 @@ class ProfileService:
         except ValueError as e:
             raise InvalidIdError
         return db_profile
+    
+
+    @staticmethod
+    def get_profile_by_name(name: str, db: Session) -> Profile | None:
+        return db.query(Profile).filter(Profile.name == name).first()
     
 
     @staticmethod

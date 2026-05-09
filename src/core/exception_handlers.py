@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from src.core.exceptions import ExternalApiError, InvalidIdError, ProfileNotFoundError
+from src.core.exceptions import ExternalApiError, InvalidIdError, ProfileNotFoundError, DuplicateResourceError
 
 
 def add_exception_handlers(app: FastAPI):
@@ -42,6 +42,17 @@ def add_exception_handlers(app: FastAPI):
     def profile_not_found_error_handler(request: Request, exc: ProfileNotFoundError):
         return JSONResponse(
             status_code=404,
+            content={
+                "status": "error",
+                "message": exc.detail
+            }
+        )
+    
+
+    @app.exception_handler(DuplicateResourceError)
+    def duplicate_resource_exception_handler(request: Request, exc: DuplicateResourceError):
+        return JSONResponse(
+            status_code=409,
             content={
                 "status": "error",
                 "message": exc.detail

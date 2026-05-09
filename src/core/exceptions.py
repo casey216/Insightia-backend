@@ -11,3 +11,8 @@ class InvalidIdError(Exception):
 class ProfileNotFoundError(Exception):
     def __init__(self, detail: str = "Profile not found") -> None:
         self.detail = detail
+
+
+class DuplicateResourceError(Exception):
+    def __init__(self, name: str = "Resource") -> None:
+        self.detail = f"{name} already exists!"

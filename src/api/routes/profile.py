@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, Response
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
@@ -11,17 +11,28 @@ from src.services.profile_service import ProfileService
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])
 
 
-@router.post("/", response_model=ProfileOut, status_code=201, response_model_exclude_none=True)
+@router.post("/", response_model=ProfileOut, response_model_exclude_none=True)
 async def create_profile(
+            response: Response,
             name: str = Body(..., min_length=1, embed=True),
             db: Session = Depends(get_db),
 
 ):
     name = name.strip().lower()
+    existing = ProfileService.get_profile_by_name(name, db)
+    if existing:
+        response.status_code = 200
+        return {
+            "status": "success",
+            "message": "Profile already exists",
+            "data": existing.to_dict()
+        }
     processed_data = await ProfileService.create_profile(name, db)
-    response = {"status": "success"}
-    response.update(processed_data)
-    return response
+    response.status_code = 201
+    return {
+        "status": "success",
+        "data": processed_data.to_dict()
+    }
 
 
 @router.get("/{id}", response_model=ProfileOut, status_code=200)
