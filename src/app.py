@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.routes.profile import router
 from src.db import database as db_module
 from src.core.exception_handlers import add_exception_handlers
-from src.core.middleware import EmptyNameMiddleware
 from src.core.settings import settings
 from src.models.profile import Profile
 
@@ -26,7 +25,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(EmptyNameMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
