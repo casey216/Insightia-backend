@@ -66,7 +66,7 @@ class ProfileService:
     @staticmethod
     def get_all_profiles(filter_params: FilterParams, db: Session) -> dict[str, typing.Any]:
         q = QueryBuilder(db.query(Profile))
-        q = q.filter_by_age(filter_params.age)
+        q = q.filter_by_age_group(filter_params.age_group)
         q = q.filter_by_country(filter_params.country_id)
         q = q.filter_by_gender(filter_params.gender)
         q = q.build()
@@ -90,13 +90,13 @@ class QueryBuilder:
 
     def filter_by_gender(self, gender: str | None):
         if gender:
-            self.query = self.query.filter(Profile.gender == gender.lower())
+            self.query = self.query.filter(Profile.gender == gender)
         return self
 
 
-    def filter_by_age(self, age: int | None):
-        if age:
-            self.query = self.query.filter(Profile.age == age)
+    def filter_by_age_group(self, age_group: str | None):
+        if age_group:
+            self.query = self.query.filter(Profile.age_group == age_group)
         return self
 
 

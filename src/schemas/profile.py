@@ -4,6 +4,8 @@ from pydantic import BaseModel, BeforeValidator
 
 
 Gender = Annotated[Literal["male", "female"], BeforeValidator(lambda x: x.lower())]
+AgeGroup = Annotated[Literal["child", "teenager", "adult", "senior"], 
+                     BeforeValidator(lambda x: x.lower())]
 
 
 class ProfileData(BaseModel):
@@ -38,5 +40,5 @@ class ProfileCreate(BaseModel):
 
 class FilterParams(BaseModel):
     gender: Gender | None = None
-    age: int | None = None
+    age_group: AgeGroup | None = None
     country_id: str | None = None
