@@ -69,6 +69,9 @@ class ProfileService:
         q = q.filter_by_age_group(filter_params.age_group)
         q = q.filter_by_country(filter_params.country_id)
         q = q.filter_by_gender(filter_params.gender)
+        q = q.filter_by_age(filter_params.min_age, filter_params.max_age)
+        q = q.filter_by_gender_probability(filter_params.min_gender_probability)
+        q = q.filter_by_country_probability(filter_params.min_country_probability)
         q = q.build()
 
         count = q.count()
@@ -103,6 +106,27 @@ class QueryBuilder:
     def filter_by_country(self, country_id: str | None):
         if country_id:
             self.query = self.query.filter(Profile.country_id == country_id.upper())
+        return self
+    
+
+    def filter_by_age(self, min_age: int | None, max_age: int | None):
+        if min_age:
+            self.query = self.query.filter(Profile.age >= min_age)
+        if max_age:
+            self.query = self.query.filter(Profile.age <= max_age)
+
+        return self
+    
+
+    def filter_by_gender_probability(self, min_gender_probability: float | None):
+        if min_gender_probability:
+            self.query = self.query.filter(Profile.gender_probability >= min_gender_probability)
+        return self
+
+
+    def filter_by_country_probability(self, min_country_probability: float | None):
+        if min_country_probability:
+            self.query = self.query.filter(Profile.country_probability >= min_country_probability)
         return self
 
 

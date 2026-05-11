@@ -1,6 +1,6 @@
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel, BeforeValidator, Field
 
 
 Gender = Annotated[Literal["male", "female"], BeforeValidator(lambda x: x.lower())]
@@ -42,3 +42,7 @@ class FilterParams(BaseModel):
     gender: Gender | None = None
     age_group: AgeGroup | None = None
     country_id: str | None = None
+    min_age: int | None = Field(None, gt=0)
+    max_age: int | None = Field(None, gt=0)
+    min_gender_probability: float | None = Field(None, ge=0.0, le=1.0)
+    min_country_probability: float | None = Field(None, ge=0.0, le=1.0)
