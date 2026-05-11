@@ -47,7 +47,7 @@ class ProfileService:
             if db_profile is None:
                 raise ProfileNotFoundError()
         except ValueError as e:
-            raise InvalidIdError
+            raise InvalidIdError(f"{id} id invalid")
         return db_profile
     
 

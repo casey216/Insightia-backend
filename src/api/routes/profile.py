@@ -62,7 +62,7 @@ async def get_all_profiles(filter_params: Annotated[FilterParams, Depends()], db
     }
 
 
-@router.delete("/id", status_code=204)
+@router.delete("/{id}", status_code=204)
 async def delete_profile(id: str, db: Annotated[Session, Depends(get_db)]):
     ProfileService.delete_profile(id, db)
     return
