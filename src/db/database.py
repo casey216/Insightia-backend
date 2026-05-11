@@ -20,7 +20,7 @@ def _build_database_url(test: bool = False) -> tuple[str, dict]:
         return url, connect_args
     
     if settings.DB_TYPE == "vercel":
-        url = f"sqlite:///tmp/{settings.DB_NAME}.db"
+        url = f"sqlite:////tmp/{settings.DB_NAME}.db"
         connect_args["check_same_thread"] = False
         return url, connect_args
     
