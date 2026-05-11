@@ -16,8 +16,8 @@ class Settings(BaseSettings):
         )
 
     # app config
-    API_NAME: str = ""
-    API_VERSION: str = ""
+    API_NAME: str = "Insightia Labs"
+    API_VERSION: str = "1.0.0"
 
     # Environment Variable
     ENV: str = "development"
