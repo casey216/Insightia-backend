@@ -13,10 +13,10 @@ class ProfileData(BaseModel):
     name: str
     gender: str
     gender_probability: float
-    sample_size: int
     age: int
     age_group: str
     country_id: str
+    country_name: str
     country_probability: float
     created_at: str
 
@@ -31,10 +31,10 @@ class ProfileCreate(BaseModel):
     name: str
     gender: str
     gender_probability: float
-    sample_size: int
     age: int
     age_group: str
     country_id: str
+    country_name: str
     country_probability: float
 
 
