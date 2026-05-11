@@ -53,4 +53,6 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app="src.app:app", reload=True)
+    reload = False
+    if settings.ENV == "development": reload = True
+    uvicorn.run(app="src.app:app", reload=reload)
