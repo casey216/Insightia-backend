@@ -82,7 +82,7 @@ async def search_nlq(
     }
 
 
-@router.get("/{id}", response_model=ProfileOut, status_code=200)
+@router.get("/{id}", response_model=ProfileOut, status_code=200, response_model_exclude_none=True)
 async def get_profile(id: str, db: Annotated[Session, Depends(get_db)]):
     profile = ProfileService.get_profile_by_id(id, db)
 
@@ -111,9 +111,6 @@ async def get_all_profiles(
             for profile in result.items
         ]
     }
-
-
-
 
 
 @router.delete("/{id}", status_code=204)
