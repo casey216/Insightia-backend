@@ -51,3 +51,14 @@ class FilterParams(BaseModel):
 class SortParams(BaseModel):
     sort_by: Literal["age", "created_at", "gender_probability"] | None = None
     order: Literal["asc", "desc"] | None = None
+
+
+class PaginationParams:
+    def __init__(self, page: int = 1, limit: int = 10):
+        self.page = max(1, page)
+        self.limit = min(limit, 50)
+
+
+    @property
+    def offset(self):
+        return (self.page - 1) * self.limit

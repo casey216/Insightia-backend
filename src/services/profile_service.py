@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.core.exceptions import InvalidIdError, ProfileNotFoundError, DuplicateResourceError
 from src.models.profile import Profile
-from src.schemas.profile import FilterParams, SortParams
+from src.schemas.profile import FilterParams, SortParams, PaginationParams
 from src.services.agify import fetch_agify_data
 from src.services.genderize import fetch_genderize_data
 from src.services.nationalize import fetch_nationalize_data
@@ -65,7 +65,7 @@ class ProfileService:
 
 
     @staticmethod
-    def get_all_profiles(filter_params: FilterParams, sort_params: SortParams, db: Session) -> dict[str, typing.Any]:
+    def get_all_profiles(filter_params: FilterParams, sort_params: SortParams, pagination_params: PaginationParams, db: Session) -> list[Profile]:
         q = QueryBuilder(db.query(Profile))
         q = q.filter_by_age_group(filter_params.age_group)
         q = q.filter_by_country(filter_params.country_id)
@@ -74,18 +74,9 @@ class ProfileService:
         q = q.filter_by_gender_probability(filter_params.min_gender_probability)
         q = q.filter_by_country_probability(filter_params.min_country_probability)
         q = q.sort_by(sort_params)
-        q = q.build()
+        q = q.paginate(pagination_params)
 
-        count = q.count()
-        profiles = [
-            profile.to_dict()
-            for profile in q.all()
-        ]
-
-        return {
-            "total": count,
-            "data": profiles
-        }
+        return q.build().all()
 
 
 class QueryBuilder:
@@ -150,6 +141,15 @@ class QueryBuilder:
 
         order_fn = desc if sort_params.order == "desc" else asc
         self.query = self.query.order_by(order_fn(sort_column))
+        return self
+    
+
+    def paginate(self, pagination_params: PaginationParams):
+        self.query = (
+            self.query
+            .offset(pagination_params.offset)
+            .limit(pagination_params.limit)
+        )
         return self
 
 

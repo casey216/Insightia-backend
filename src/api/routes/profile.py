@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
-from src.schemas.profile import ProfileOut, FilterParams, SortParams
+from src.schemas.profile import ProfileOut, FilterParams, SortParams, PaginationParams
 from src.services.profile_service import ProfileService
 
 
@@ -55,13 +55,19 @@ async def get_profile(id: str, db: Annotated[Session, Depends(get_db)]):
 async def get_all_profiles(
     filter_params: Annotated[FilterParams, Depends()],
     sort_params: Annotated[SortParams, Depends()],
+    pagination_params: Annotated[PaginationParams, Depends()],
     db: Annotated[Session, Depends(get_db)]):
-    result = ProfileService.get_all_profiles(filter_params, sort_params, db)
+
+    profiles = ProfileService.get_all_profiles(filter_params, sort_params, pagination_params, db)
+    count = len(profiles)
 
     return {
         "status": "success",
-        "count": result.get("total"),
-        "data": result.get("data")
+        "count": count,
+        "data": [
+            profile.to_dict()
+            for profile in profiles
+        ]
     }
 
 
