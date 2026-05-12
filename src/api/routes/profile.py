@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, Query
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
 from src.schemas.profile import ProfileOut, FilterParams, SortParams, PaginationParams
 from src.services.profile_service import ProfileService
+from src.utils.nlq_parser import parse_nl_query
 
 
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])
@@ -41,6 +42,46 @@ async def create_profile(
     }
 
 
+@router.get("/search", status_code=200)
+async def search_nlq(
+    *,
+    query: str | None = None,
+    pagination_params: Annotated[PaginationParams, Depends()],
+    sort_params: Annotated[SortParams, Depends()],
+    db: Annotated[Session, Depends(get_db)]
+    ):
+    if query is None or query.strip() == "":
+        raise HTTPException(
+            status_code=400,
+            detail="Missing or empty query."
+        )
+    filters = parse_nl_query(query)
+
+    if filters == {}:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to interpret query"
+        )
+
+    result = ProfileService.get_all_profiles(
+        filter_params=FilterParams(**filters),
+        sort_params=sort_params,
+        pagination_params=pagination_params,
+        db=db
+    )
+
+    return {
+        "status": "success",
+        "page": result.page,
+        "limit": result.limit,
+        "total": result.total,
+        "data": [
+            profile.to_dict()
+            for profile in result.items
+        ]
+    }
+
+
 @router.get("/{id}", response_model=ProfileOut, status_code=200)
 async def get_profile(id: str, db: Annotated[Session, Depends(get_db)]):
     profile = ProfileService.get_profile_by_id(id, db)
@@ -70,6 +111,9 @@ async def get_all_profiles(
             for profile in result.items
         ]
     }
+
+
+
 
 
 @router.delete("/{id}", status_code=204)
