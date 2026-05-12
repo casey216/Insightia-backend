@@ -58,15 +58,16 @@ async def get_all_profiles(
     pagination_params: Annotated[PaginationParams, Depends()],
     db: Annotated[Session, Depends(get_db)]):
 
-    profiles = ProfileService.get_all_profiles(filter_params, sort_params, pagination_params, db)
-    count = len(profiles)
+    result = ProfileService.get_all_profiles(filter_params, sort_params, pagination_params, db)
 
     return {
         "status": "success",
-        "count": count,
+        "page": result.page,
+        "limit": result.limit,
+        "total": result.total,
         "data": [
             profile.to_dict()
-            for profile in profiles
+            for profile in result.items
         ]
     }
 

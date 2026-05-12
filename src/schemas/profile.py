@@ -1,6 +1,8 @@
 from typing import Literal, Annotated
 
-from pydantic import BaseModel, BeforeValidator, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+
+from src.models.profile import Profile
 
 
 Gender = Annotated[Literal["male", "female"], BeforeValidator(lambda x: x.lower())]
@@ -62,3 +64,12 @@ class PaginationParams:
     @property
     def offset(self):
         return (self.page - 1) * self.limit
+    
+
+class PaginatedResult(BaseModel):
+    items: list[Profile]
+    page: int
+    limit: int
+    total: int
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)

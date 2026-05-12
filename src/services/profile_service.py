@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.core.exceptions import InvalidIdError, ProfileNotFoundError, DuplicateResourceError
 from src.models.profile import Profile
-from src.schemas.profile import FilterParams, SortParams, PaginationParams
+from src.schemas.profile import FilterParams, SortParams, PaginationParams, PaginatedResult
 from src.services.agify import fetch_agify_data
 from src.services.genderize import fetch_genderize_data
 from src.services.nationalize import fetch_nationalize_data
@@ -65,18 +65,32 @@ class ProfileService:
 
 
     @staticmethod
-    def get_all_profiles(filter_params: FilterParams, sort_params: SortParams, pagination_params: PaginationParams, db: Session) -> list[Profile]:
-        q = QueryBuilder(db.query(Profile))
-        q = q.filter_by_age_group(filter_params.age_group)
-        q = q.filter_by_country(filter_params.country_id)
-        q = q.filter_by_gender(filter_params.gender)
-        q = q.filter_by_age(filter_params.min_age, filter_params.max_age)
-        q = q.filter_by_gender_probability(filter_params.min_gender_probability)
-        q = q.filter_by_country_probability(filter_params.min_country_probability)
-        q = q.sort_by(sort_params)
-        q = q.paginate(pagination_params)
+    def get_all_profiles(filter_params: FilterParams, sort_params: SortParams, pagination_params: PaginationParams, db: Session) -> PaginatedResult:
+        q = (
+            QueryBuilder(db.query(Profile))
+            .filter_by_age_group(filter_params.age_group)
+            .filter_by_country(filter_params.country_id)
+            .filter_by_gender(filter_params.gender)
+            .filter_by_age(filter_params.min_age, filter_params.max_age)
+            .filter_by_gender_probability(filter_params.min_gender_probability)
+            .filter_by_country_probability(filter_params.min_country_probability)
+            .sort_by(sort_params)
+        )
 
-        return q.build().all()
+        total = q.count()
+
+        profiles = (
+            q.paginate(pagination_params)
+            .build()
+            .all()
+        )
+
+        return PaginatedResult(
+            items=profiles,
+            page=pagination_params.page,
+            limit=pagination_params.limit,
+            total=total
+        )
 
 
 class QueryBuilder:
@@ -151,6 +165,10 @@ class QueryBuilder:
             .limit(pagination_params.limit)
         )
         return self
+    
+
+    def count(self) -> int:
+        return self.query.count()
 
 
     def build(self) -> Query[Profile]:
