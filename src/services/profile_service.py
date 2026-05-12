@@ -1,12 +1,13 @@
 import typing
 import uuid
 
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import IntegrityError
 
 from src.core.exceptions import InvalidIdError, ProfileNotFoundError, DuplicateResourceError
 from src.models.profile import Profile
-from src.schemas.profile import FilterParams
+from src.schemas.profile import FilterParams, SortParams
 from src.services.agify import fetch_agify_data
 from src.services.genderize import fetch_genderize_data
 from src.services.nationalize import fetch_nationalize_data
@@ -64,7 +65,7 @@ class ProfileService:
 
 
     @staticmethod
-    def get_all_profiles(filter_params: FilterParams, db: Session) -> dict[str, typing.Any]:
+    def get_all_profiles(filter_params: FilterParams, sort_params: SortParams, db: Session) -> dict[str, typing.Any]:
         q = QueryBuilder(db.query(Profile))
         q = q.filter_by_age_group(filter_params.age_group)
         q = q.filter_by_country(filter_params.country_id)
@@ -72,6 +73,7 @@ class ProfileService:
         q = q.filter_by_age(filter_params.min_age, filter_params.max_age)
         q = q.filter_by_gender_probability(filter_params.min_gender_probability)
         q = q.filter_by_country_probability(filter_params.min_country_probability)
+        q = q.sort_by(sort_params)
         q = q.build()
 
         count = q.count()
@@ -89,6 +91,11 @@ class ProfileService:
 class QueryBuilder:
     def __init__(self, query: Query[Profile]) -> None:
         self.query = query
+        self.sort_columns = {
+            "age": Profile.age,
+            "created_at": Profile.created_at,
+            "gender_probability": Profile.gender_probability,
+        }
 
 
     def filter_by_gender(self, gender: str | None):
@@ -127,6 +134,22 @@ class QueryBuilder:
     def filter_by_country_probability(self, min_country_probability: float | None):
         if min_country_probability:
             self.query = self.query.filter(Profile.country_probability >= min_country_probability)
+        return self
+    
+
+    def sort_by(self, sort_params: SortParams):
+        sort_column = (
+            self.sort_columns.get(sort_params.sort_by) 
+            if sort_params.sort_by 
+            else None
+            )
+
+        if sort_column is None:
+            self.query = self.query.order_by(asc(Profile.created_at))
+            return self
+
+        order_fn = desc if sort_params.order == "desc" else asc
+        self.query = self.query.order_by(order_fn(sort_column))
         return self
 
 

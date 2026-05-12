@@ -46,3 +46,8 @@ class FilterParams(BaseModel):
     max_age: int | None = Field(None, gt=0)
     min_gender_probability: float | None = Field(None, ge=0.0, le=1.0)
     min_country_probability: float | None = Field(None, ge=0.0, le=1.0)
+
+
+class SortParams(BaseModel):
+    sort_by: Literal["age", "created_at", "gender_probability"] | None = None
+    order: Literal["asc", "desc"] | None = None
