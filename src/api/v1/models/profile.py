@@ -5,7 +5,7 @@ from uuid_extensions import uuid7
 from sqlalchemy import String, Integer, DateTime, UUID, Float, func
 from sqlalchemy.orm import mapped_column, Mapped
 
-from src.models.base import BaseModel
+from src.api.v1.models.base import BaseModel
 
 class Profile(BaseModel):
     __tablename__ = "profiles"

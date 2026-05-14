@@ -3,11 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes.profile import router
-from src.db import database as db_module
-from src.core.exception_handlers import add_exception_handlers
-from src.core.settings import settings
-from src.models.profile import Profile
+from src.api.v1.routes.profile import router
+from src.api.db import database as db_module
+from src.api.core.exception_handlers import add_exception_handlers
+from src.api.core.settings import settings
+from src.api.v1.models.profile import Profile
 
 
 @asynccontextmanager

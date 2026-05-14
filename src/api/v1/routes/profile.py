@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, Query
 from sqlalchemy.orm import Session
 
-from src.db.database import get_db
-from src.schemas.profile import ProfileOut, FilterParams, SortParams, PaginationParams
-from src.services.profile_service import ProfileService
-from src.utils.nlq_parser import parse_nl_query
+from src.api.db.database import get_db
+from src.api.v1.schemas.profile import ProfileOut, FilterParams, SortParams, PaginationParams
+from src.api.v1.services.profile_service import ProfileService
+from src.api.utils.nlq_parser import parse_nl_query
 
 
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])

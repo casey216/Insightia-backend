@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import inspect
 from sqlalchemy.orm import Mapper
 
-from src.db.database import Base
+from src.api.db.database import Base
 
 
 class ModelMixin:

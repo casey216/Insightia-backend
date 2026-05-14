@@ -2,17 +2,17 @@ from typing import Any
 
 import httpx
 
-from src.core.exceptions import ExternalApiError
+from src.api.core.exceptions import ExternalApiError
 
 
-NATIONALIZE_URL = "https://api.nationalize.io"
+AGIFY_URL = "https://api.agify.io"
 
 
-async def fetch_nationalize_data(name: str) -> dict[str, Any]:
+async def fetch_agify_data(name: str) -> dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
             response = await client.get(
-                url=NATIONALIZE_URL,
+                url=AGIFY_URL,
                 params={
                     "name": name
                 },

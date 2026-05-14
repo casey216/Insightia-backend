@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.core.exceptions import ExternalApiError
+from src.api.core.exceptions import ExternalApiError
 
 
 def process_genderize_response(data: dict[str, Any]) -> dict[str, Any]:

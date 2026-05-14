@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from src.core.exceptions import ExternalApiError, InvalidIdError, ProfileNotFoundError, DuplicateResourceError
+from src.api.core.exceptions import ExternalApiError, InvalidIdError, ProfileNotFoundError, DuplicateResourceError
 
 
 def add_exception_handlers(app: FastAPI):

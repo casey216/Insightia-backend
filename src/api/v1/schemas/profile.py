@@ -2,7 +2,7 @@ from typing import Literal, Annotated
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
-from src.models.profile import Profile
+from src.api.v1.models.profile import Profile
 
 
 Gender = Annotated[Literal["male", "female"], BeforeValidator(lambda x: x.lower())]

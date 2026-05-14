@@ -3,7 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.app import app
-from src.db import database as db_module
+from src.api.db import database as db_module
 
 
 @pytest.fixture(scope="function", autouse=True)

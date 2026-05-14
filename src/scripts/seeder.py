@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from src.db import database as db_module
-from src.models.profile import Profile
+from src.api.db import database as db_module
+from src.api.v1.models.profile import Profile
 
 
 BASE_DIR = Path(__file__).resolve().parent

@@ -5,13 +5,13 @@ from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import IntegrityError
 
-from src.core.exceptions import InvalidIdError, ProfileNotFoundError, DuplicateResourceError
-from src.models.profile import Profile
-from src.schemas.profile import FilterParams, SortParams, PaginationParams, PaginatedResult
-from src.services.agify import fetch_agify_data
-from src.services.genderize import fetch_genderize_data
-from src.services.nationalize import fetch_nationalize_data
-from src.utils.helpers import process_responses
+from src.api.core.exceptions import InvalidIdError, ProfileNotFoundError, DuplicateResourceError
+from src.api.v1.models.profile import Profile
+from src.api.v1.schemas.profile import FilterParams, SortParams, PaginationParams, PaginatedResult
+from src.api.v1.services.agify import fetch_agify_data
+from src.api.v1.services.genderize import fetch_genderize_data
+from src.api.v1.services.nationalize import fetch_nationalize_data
+from src.api.utils.helpers import process_responses
 
 
 class ProfileService:

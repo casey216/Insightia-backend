@@ -2,7 +2,7 @@ from typing import Any
 
 import httpx
 
-from src.core.exceptions import ExternalApiError
+from src.api.core.exceptions import ExternalApiError
 
 
 GENDERIZE_URL = "https://api.genderize.io"

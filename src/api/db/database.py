@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from src.core.settings import settings, BASE_DIR
+from src.api.core.settings import settings, BASE_DIR
 
 
 def _build_database_url(test: bool = False) -> tuple[str, dict]:
