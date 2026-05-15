@@ -14,7 +14,6 @@ def process_genderize_response(data: dict[str, Any]) -> dict[str, Any]:
     return {
         "gender": gender,
         "gender_probability": gender_probability,
-        "sample_size": sample_size,
     }
 
 

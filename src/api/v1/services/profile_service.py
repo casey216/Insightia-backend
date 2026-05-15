@@ -17,6 +17,7 @@ from src.api.v1.schemas.profile import (
     PaginatedResult,
 )
 from src.api.v1.services.agify import fetch_agify_data
+from src.api.v1.services.api_countries import fetch_country_data
 from src.api.v1.services.genderize import fetch_genderize_data
 from src.api.v1.services.nationalize import fetch_nationalize_data
 from src.api.utils.helpers import process_responses
@@ -34,6 +35,13 @@ class ProfileService:
         processed_data = process_responses(
             name, agify_data, genderize_data, nationalize_data
         )
+
+        country_data = await fetch_country_data(
+            processed_data.get("country_id", "")
+        )
+        country_name = country_data.get("name")
+        processed_data["country_name"] = country_name
+
         db_profile = Profile(**processed_data)
 
         try:

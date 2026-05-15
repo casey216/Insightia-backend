@@ -61,18 +61,27 @@ def mock_external_api_calls(monkeypatch):
                 ],
             }
 
+        async def fetch_country_data(name):
+            return {"name": "Nigeria"}
+
         monkeypatch.setattr(
-            "src.services.profile_service.fetch_agify_data", fetch_agify_data
+            "src.api.v1.services.profile_service.fetch_agify_data",
+            fetch_agify_data,
         )
 
         monkeypatch.setattr(
-            "src.services.profile_service.fetch_genderize_data",
+            "src.api.v1.services.profile_service.fetch_genderize_data",
             fetch_genderize_data,
         )
 
         monkeypatch.setattr(
-            "src.services.profile_service.fetch_nationalize_data",
+            "src.api.v1.services.profile_service.fetch_nationalize_data",
             fetch_nationalize_data,
+        )
+
+        monkeypatch.setattr(
+            "src.api.v1.services.profile_service.fetch_country_data",
+            fetch_country_data,
         )
 
     return _mock
