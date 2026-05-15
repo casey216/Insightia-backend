@@ -5,9 +5,13 @@ from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from src.api.v1.models.profile import Profile
 
 
-Gender = Annotated[Literal["male", "female"], BeforeValidator(lambda x: x.lower())]
-AgeGroup = Annotated[Literal["child", "teenager", "adult", "senior"], 
-                     BeforeValidator(lambda x: x.lower())]
+Gender = Annotated[
+    Literal["male", "female"], BeforeValidator(lambda x: x.lower())
+]
+AgeGroup = Annotated[
+    Literal["child", "teenager", "adult", "senior"],
+    BeforeValidator(lambda x: x.lower()),
+]
 
 
 class ProfileData(BaseModel):
@@ -60,11 +64,10 @@ class PaginationParams:
         self.page = max(1, page)
         self.limit = min(limit, 50)
 
-
     @property
     def offset(self):
         return (self.page - 1) * self.limit
-    
+
 
 class PaginatedResult(BaseModel):
     items: list[Profile]

@@ -1,7 +1,12 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from src.api.core.exceptions import ExternalApiError, InvalidIdError, ProfileNotFoundError, DuplicateResourceError
+from src.api.core.exceptions import (
+    ExternalApiError,
+    InvalidIdError,
+    ProfileNotFoundError,
+    DuplicateResourceError,
+)
 
 
 def add_exception_handlers(app: FastAPI):
@@ -9,67 +14,41 @@ def add_exception_handlers(app: FastAPI):
     def custom_http_exception_handler(request: Request, exc: HTTPException):
         return JSONResponse(
             status_code=exc.status_code,
-            content={
-                "status": "error",
-                "message": exc.detail
-            }
+            content={"status": "error", "message": exc.detail},
         )
 
-    
     @app.exception_handler(ExternalApiError)
     def external_api_error_handler(request: Request, exc: ExternalApiError):
         return JSONResponse(
-            status_code=502,
-            content={
-                "status": "error",
-                "message": exc.detail
-            }
+            status_code=502, content={"status": "error", "message": exc.detail}
         )
-
 
     @app.exception_handler(InvalidIdError)
     def invalid_id_error_handler(request: Request, exc: InvalidIdError):
         return JSONResponse(
-            status_code=400,
-            content={
-                "status": "error",
-                "message": exc.detail
-            }
+            status_code=400, content={"status": "error", "message": exc.detail}
         )
-
 
     @app.exception_handler(ProfileNotFoundError)
-    def profile_not_found_error_handler(request: Request, exc: ProfileNotFoundError):
+    def profile_not_found_error_handler(
+        request: Request, exc: ProfileNotFoundError
+    ):
         return JSONResponse(
-            status_code=404,
-            content={
-                "status": "error",
-                "message": exc.detail
-            }
+            status_code=404, content={"status": "error", "message": exc.detail}
         )
-    
 
     @app.exception_handler(DuplicateResourceError)
-    def duplicate_resource_exception_handler(request: Request, exc: DuplicateResourceError):
+    def duplicate_resource_exception_handler(
+        request: Request, exc: DuplicateResourceError
+    ):
         return JSONResponse(
-            status_code=409,
-            content={
-                "status": "error",
-                "message": exc.detail
-            }
+            status_code=409, content={"status": "error", "message": exc.detail}
         )
 
-
     @app.exception_handler(Exception)
-    def internal_server_error_handler(
-        request: Request,
-        exc: Exception
-    ):
+    def internal_server_error_handler(request: Request, exc: Exception):
 
         return JSONResponse(
             status_code=500,
-            content={
-                "status": "error",
-                "message": "Internal server error"
-            }
+            content={"status": "error", "message": "Internal server error"},
         )
