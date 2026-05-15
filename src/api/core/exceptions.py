@@ -44,4 +44,3 @@ class DuplicateResourceError(Exception):
 
     def __init__(self, name: str = "Resource") -> None:
         self.detail = f"{name} already exists!"
-    

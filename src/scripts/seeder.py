@@ -29,5 +29,5 @@ def seed_profiles():
                 print(f"Error {e} occured!")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     seed_profiles()

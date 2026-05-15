@@ -3,11 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.v1.routes.profile import router
+import src.api.v1.models  # noqa: F401
 from src.api.db import database as db_module
 from src.api.core.exception_handlers import add_exception_handlers
 from src.api.core.settings import settings
-from src.api.v1.models.profile import Profile
+from src.api.v1.routes.profile import router
 
 
 @asynccontextmanager
@@ -16,7 +16,6 @@ async def lifespan(app: FastAPI):
     db_module.Base.metadata.create_all(bind=db_module.engine)
 
     yield
-
 
 
 app = FastAPI(
@@ -30,7 +29,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_credentials=False,
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 app.include_router(router)
@@ -39,20 +38,18 @@ add_exception_handlers(app)
 
 @app.get("/")
 def root():
-    return {
-        "message": "welcome to Insightia." 
-    }
+    return {"message": "welcome to Insightia."}
 
 
 @app.get("/health-check")
 def health_check():
-    return {
-        "health": "ok"
-    }
+    return {"health": "ok"}
 
 
 if __name__ == "__main__":
     import uvicorn
+
     reload = False
-    if settings.ENV == "development": reload = True
+    if settings.ENV == "development":
+        reload = True
     uvicorn.run(app="src.app:app", reload=reload)
