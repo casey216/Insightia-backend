@@ -1,3 +1,4 @@
+import secrets
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,6 +28,15 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = ""
     DB_PORT: str = ""
     DB_NAME: str = ""
+
+    # Github variables
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: str = ""
+    GITHUB_USER_URL: str = ""
+    GITHUB_TOKEN_URL: str = ""
+    GITHUB_AUTHORIZE_URL: str = ""
+    SECRET_KEY: str = secrets.token_hex(32)
+    CSRF_MAX_AGE_SECONDS: int = 600
 
 
 settings = Settings()

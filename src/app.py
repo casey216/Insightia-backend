@@ -7,7 +7,8 @@ import src.api.v1.models  # noqa: F401
 from src.api.db import database as db_module
 from src.api.core.exception_handlers import add_exception_handlers
 from src.api.core.settings import settings
-from src.api.v1.routes.profile import router
+from src.api.v1.routes.profile import router as profile_router
+from src.api.v1.routes.auth import router as auth_router
 
 
 @asynccontextmanager
@@ -32,7 +33,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(auth_router)
+app.include_router(profile_router)
 add_exception_handlers(app)
 
 
