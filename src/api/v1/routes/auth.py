@@ -1,5 +1,6 @@
 import secrets
 
+import httpx
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
@@ -41,6 +42,45 @@ def verify_state_token(token: str, session_id: str):
     )
 
 
+async def exchange_code_for_token(code: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            settings.GITHUB_TOKEN_URL,
+            headers={"Accept": "application/json"},
+            data={
+                "client_id": settings.GITHUB_CLIENT_ID,
+                "client_secret": settings.GITHUB_CLIENT_SECRET,
+                "code": code,
+            },
+        )
+        return response.json()
+    
+
+async def get_github_user(token: str):
+    headers={
+        "Authorization": f"Bearer {token}"
+        }
+    async with httpx.AsyncClient() as client:
+        user_res = await client.get(
+            settings.GITHUB_USER_URL,
+            headers=headers
+        )
+        email_res = await client.get(
+            settings.GITHUB_EMAIL_URL,
+            headers=headers
+        )
+        user = user_res.json()
+        result = {
+            "github_id": str(user.get("id")),
+            "username": user.get("login"),
+            "avatar_url": user.get("avatar_url")
+        }
+        for email in email_res.json():
+            if email.get("verified") and email.get("primary"):
+                result["email"] = email.get("email")
+        return result
+
+
 @router.get("/github")
 async def login(request: Request):
     session_id = request.cookies.get("session_id")
@@ -71,7 +111,7 @@ async def login(request: Request):
 
 
 @router.get("/github/callback")
-async def get_callback(request: Request, code: str, state: str):
+async def handle_callback(request: Request, code: str, state: str):
     session_id = request.cookies.get("session_id")
     if not session_id:
         raise HTTPException(status_code=400, detail="session cookie missing")
@@ -81,4 +121,8 @@ async def get_callback(request: Request, code: str, state: str):
     if not state or not verify_state_token(state, session_id):
         raise HTTPException(status_code=403, detail="CSRF validation failed: invalid or expired state parameter")
     
-    return {"status": "state verified"}
+    token_data = await exchange_code_for_token(code)
+    github_access_token = token_data.get("access_token")
+    user_data = await get_github_user(github_access_token)
+    
+    return {"user": user_data}

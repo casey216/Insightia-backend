@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     GITHUB_USER_URL: str = ""
     GITHUB_TOKEN_URL: str = ""
     GITHUB_AUTHORIZE_URL: str = ""
+    GITHUB_EMAIL_URL:str = ""
     SECRET_KEY: str = secrets.token_hex(32)
     CSRF_MAX_AGE_SECONDS: int = 600
 
