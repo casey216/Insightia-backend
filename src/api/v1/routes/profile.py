@@ -10,7 +10,7 @@ from src.api.v1.schemas.profile import (
     SortParams,
     PaginationParams,
 )
-from src.api.v1.services.profile_service import ProfileService
+from src.api.v1.services.profile import ProfileService
 from src.api.utils.nlq_parser import parse_nl_query
 
 

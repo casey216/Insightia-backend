@@ -1,125 +1,18 @@
 import secrets
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-import httpx
-from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from jose import jwt, JWSError
-from jose.exceptions import ExpiredSignatureError
 from sqlalchemy.orm import Session
 
+from ..services.auth import AuthService
+from ..services.github import exchange_code_for_token, get_github_user
+from ..services.user import UserService
 from src.api.core.settings import settings
 from src.api.db.database import get_db
-from src.api.v1.services.user_service import UserService
 
 
-serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
 router = APIRouter(prefix="/auth", tags=["authentication"])
-
-
-def create_state_token(session_id: str):
-    payload = {
-        "sid": session_id,
-        "nonce": secrets.token_urlsafe(16)
-    }
-
-    return serializer.dumps(
-        payload,
-        salt="oauth-state"
-    )
-
-
-def verify_state_token(token: str, session_id: str):
-    try:
-        payload = serializer.loads(
-            token,
-            salt="oauth-state",
-            max_age=settings.CSRF_MAX_AGE_SECONDS
-        )
-    except SignatureExpired:
-        return False
-    except BadSignature:
-        return False
-    
-    return secrets.compare_digest(
-        payload["sid"],
-        session_id
-    )
-
-
-async def exchange_code_for_token(code: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            settings.GITHUB_TOKEN_URL,
-            headers={"Accept": "application/json"},
-            data={
-                "client_id": settings.GITHUB_CLIENT_ID,
-                "client_secret": settings.GITHUB_CLIENT_SECRET,
-                "code": code,
-            },
-        )
-        return response.json()
-    
-
-async def get_github_user(token: str):
-    headers={
-        "Authorization": f"Bearer {token}"
-        }
-    async with httpx.AsyncClient() as client:
-        user_res = await client.get(
-            settings.GITHUB_USER_URL,
-            headers=headers
-        )
-        email_res = await client.get(
-            settings.GITHUB_EMAIL_URL,
-            headers=headers
-        )
-        user = user_res.json()
-        result = {
-            "github_id": str(user.get("id")),
-            "username": user.get("login"),
-            "avatar_url": user.get("avatar_url")
-        }
-        for email in email_res.json():
-            if email.get("verified") and email.get("primary"):
-                result["email"] = email.get("email")
-        return result
-    
-
-def create_jwt(data: dict, expires_delta_minutes: int):
-    iat = datetime.now(timezone.utc)
-    exp = iat + timedelta(minutes=expires_delta_minutes)
-    payload = {
-        **data,
-        "iat": iat,
-        "exp": exp
-    }
-    return jwt.encode(
-        payload,
-        key=settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
-    )
-
-
-def verify_jwt(token: str):
-    try:
-        return jwt.decode(
-            token=token,
-            key=settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
-        )
-    except ExpiredSignatureError:
-        raise HTTPException(
-            401,
-            detail="Token expired"
-        )
-    except JWSError:
-        raise HTTPException(
-            401,
-            detail="Invalid Token"
-        )
 
 
 @router.get("/github")
@@ -128,7 +21,7 @@ async def login(request: Request):
     if not session_id:
         session_id = secrets.token_urlsafe(32)
 
-    oauth_state = create_state_token(session_id)
+    oauth_state = AuthService.create_state_token(session_id)
 
     url = (
         f"{settings.GITHUB_AUTHORIZE_URL}"
@@ -161,10 +54,11 @@ async def handle_callback(
     session_id = request.cookies.get("session_id")
     if not session_id:
         raise HTTPException(status_code=400, detail="session cookie missing")
+    
     if not code:
         raise HTTPException(status_code=400, detail="Missing 'code' parameter from Github")
     
-    if not state or not verify_state_token(state, session_id):
+    if not state or not AuthService.verify_state_token(state, session_id):
         raise HTTPException(status_code=403, detail="CSRF validation failed: invalid or expired state parameter")
     
     token_data = await exchange_code_for_token(code)
@@ -175,8 +69,8 @@ async def handle_callback(
     user_data = await get_github_user(github_access_token)
     
     db_user = UserService.create(user_data, db)
-    access_token = create_jwt(db_user.to_dict(), 3)
-    refresh_token = create_jwt(db_user.to_dict(), 5)
+    access_token = AuthService.create_jwt(db_user.to_dict(), 3)
+    refresh_token = AuthService.create_jwt(db_user.to_dict(), 5)
 
     response = RedirectResponse("/")
 
