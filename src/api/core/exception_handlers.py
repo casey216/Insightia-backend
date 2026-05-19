@@ -1,11 +1,12 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from src.api.core.exceptions import (
+from .exceptions import (
     ExternalApiError,
     InvalidIdError,
     ResourceNotFoundError,
     DuplicateResourceError,
+    InvalidTokenError,
 )
 
 
@@ -43,6 +44,14 @@ def add_exception_handlers(app: FastAPI):
     ):
         return JSONResponse(
             status_code=409, content={"status": "error", "message": exc.detail}
+        )
+    
+    @app.exception_handler(InvalidTokenError)
+    def invalid_token_error_handler(request: Request, exc: InvalidTokenError):
+
+        return JSONResponse(
+            status_code=401,
+            content={"status": "error", "message": exc.detail},
         )
 
     @app.exception_handler(Exception)

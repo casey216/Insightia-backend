@@ -44,3 +44,15 @@ class DuplicateResourceError(Exception):
 
     def __init__(self, name: str = "Resource") -> None:
         self.detail = f"{name} already exists!"
+
+
+class InvalidTokenError(Exception):
+    """
+    Raised when decoding an invalid token.
+
+    Args:
+        detail: Description of the error.
+    """
+
+    def __init__(self, detail: str = "Token is invalid") -> None:
+        self.detail = detail

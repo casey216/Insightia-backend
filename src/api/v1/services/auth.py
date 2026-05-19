@@ -6,6 +6,7 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from jose import jwt, JWSError
 from jose.exceptions import ExpiredSignatureError
 
+from src.api.core.exceptions import InvalidTokenError
 from src.api.core.settings import settings
 
 
@@ -69,12 +70,6 @@ class AuthService:
                 algorithms=[settings.ALGORITHM]
             )
         except ExpiredSignatureError:
-            raise HTTPException(
-                401,
-                detail="Token expired"
-            )
+            raise InvalidTokenError("Token Expired.")
         except JWSError:
-            raise HTTPException(
-                401,
-                detail="Invalid Token"
-            )
+            raise InvalidTokenError("Invalid Token")
