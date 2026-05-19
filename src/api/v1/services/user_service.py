@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..models.user import User
+from src.api.core.exceptions import ResourceNotFoundError, InvalidIdError
 
 
 class UserService:
@@ -39,9 +40,11 @@ class UserService:
     def get_user_by_id(id: str, db: Session) -> User | None:
         try:
             db_user = db.get(User, UUID(id))
+            if not db_user:
+                raise ResourceNotFoundError("User")
             return db_user
-        except ValueError as e:
-            raise e
+        except ValueError:
+            raise InvalidIdError("User")
         
     @staticmethod
     def get_user_by_github_id(id: str, db: Session) -> User | None:
@@ -56,9 +59,7 @@ class UserService:
     @staticmethod
     def update(id: str, user_data: dict, db: Session) -> User | None:
         try:
-            db_user = db.get(User, UUID(id))
-            if not db_user:
-                return None
+            db_user = UserService.get_user_by_id(id, db)
             
             changed = False
             user_data["updated_at"] = datetime.now(timezone.utc)

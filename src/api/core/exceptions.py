@@ -12,14 +12,14 @@ class ExternalApiError(Exception):
 
 class InvalidIdError(Exception):
     """
-    Raised when a provided profile ID is invalid or malformed.
+    Raised when a provided resource ID is invalid or malformed.
 
     Args:
-        detail: Description of the invalid ID error.
+        name: Name of the resource.
     """
 
-    def __init__(self, detail: str = "Invalid profile id") -> None:
-        self.detail = detail
+    def __init__(self, name: str = "Resource") -> None:
+        self.detail = f"{name} ID is invalid."
 
 
 class ResourceNotFoundError(Exception):

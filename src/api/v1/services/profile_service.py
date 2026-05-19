@@ -60,7 +60,7 @@ class ProfileService:
             if db_profile is None:
                 raise ResourceNotFoundError("Profile")
         except ValueError:
-            raise InvalidIdError(f"id {id} is invalid")
+            raise InvalidIdError(f"Profile")
         return db_profile
 
     @staticmethod
