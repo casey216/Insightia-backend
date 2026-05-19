@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.api.core.exceptions import (
     InvalidIdError,
-    ProfileNotFoundError,
+    ResourceNotFoundError,
     DuplicateResourceError,
 )
 from src.api.v1.models.profile import Profile
@@ -58,7 +58,7 @@ class ProfileService:
         try:
             db_profile = db.query(Profile).filter_by(id=uuid.UUID(id)).first()
             if db_profile is None:
-                raise ProfileNotFoundError()
+                raise ResourceNotFoundError("Profile")
         except ValueError:
             raise InvalidIdError(f"id {id} is invalid")
         return db_profile

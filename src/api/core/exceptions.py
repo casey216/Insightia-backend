@@ -22,16 +22,16 @@ class InvalidIdError(Exception):
         self.detail = detail
 
 
-class ProfileNotFoundError(Exception):
+class ResourceNotFoundError(Exception):
     """
-    Raised when a requested profile cannot be found in the database.
+    Raised when a requested resource cannot be found in the database.
 
     Args:
-        detail: Description of the missing profile.
+        name: Name of the missing resource.
     """
 
-    def __init__(self, detail: str = "Profile not found") -> None:
-        self.detail = detail
+    def __init__(self, name: str = "Resource") -> None:
+        self.detail = f"{name} not found."
 
 
 class DuplicateResourceError(Exception):
