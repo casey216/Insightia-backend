@@ -1,11 +1,18 @@
 import secrets
+from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 import httpx
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from jose import jwt, JWSError
+from jose.exceptions import ExpiredSignatureError
+from sqlalchemy.orm import Session
 
 from src.api.core.settings import settings
+from src.api.db.database import get_db
+from src.api.v1.services.user_service import UserService
 
 
 serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
@@ -79,6 +86,40 @@ async def get_github_user(token: str):
             if email.get("verified") and email.get("primary"):
                 result["email"] = email.get("email")
         return result
+    
+
+def create_jwt(data: dict, expires_delta_minutes: int):
+    iat = datetime.now(timezone.utc)
+    exp = iat + timedelta(minutes=expires_delta_minutes)
+    payload = {
+        **data,
+        "iat": iat,
+        "exp": exp
+    }
+    return jwt.encode(
+        payload,
+        key=settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM
+    )
+
+
+def verify_jwt(token: str):
+    try:
+        return jwt.decode(
+            token=token,
+            key=settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
+    except ExpiredSignatureError:
+        raise HTTPException(
+            401,
+            detail="Token expired"
+        )
+    except JWSError:
+        raise HTTPException(
+            401,
+            detail="Invalid Token"
+        )
 
 
 @router.get("/github")
@@ -111,7 +152,12 @@ async def login(request: Request):
 
 
 @router.get("/github/callback")
-async def handle_callback(request: Request, code: str, state: str):
+async def handle_callback(
+    request: Request,
+    code: str,
+    state: str,
+    db: Annotated[Session, Depends(get_db)]
+    ):
     session_id = request.cookies.get("session_id")
     if not session_id:
         raise HTTPException(status_code=400, detail="session cookie missing")
@@ -123,6 +169,33 @@ async def handle_callback(request: Request, code: str, state: str):
     
     token_data = await exchange_code_for_token(code)
     github_access_token = token_data.get("access_token")
+    if not github_access_token:
+        raise HTTPException(400, "GitHub OAuth failed")
+    
     user_data = await get_github_user(github_access_token)
     
-    return {"user": user_data}
+    db_user = UserService.create(user_data, db)
+    access_token = create_jwt(db_user.to_dict(), 3)
+    refresh_token = create_jwt(db_user.to_dict(), 5)
+
+    response = RedirectResponse("/")
+
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        max_age=180,
+        secure=False,
+        httponly=True,
+        samesite='lax',
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        max_age=300,
+        secure=False,
+        httponly=True,
+        samesite='lax',
+    )
+
+    return response

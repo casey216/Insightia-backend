@@ -12,7 +12,7 @@ class UserService:
     """Handles all business logic for user account management."""
 
     @staticmethod
-    def create(user_data: dict, db: Session) -> User | None:
+    def create(user_data: dict, db: Session) -> User:
         db_user = User(**user_data)
         db.add(db_user)
 
@@ -23,22 +23,23 @@ class UserService:
         except IntegrityError:
             db.rollback()
             github_id = user_data.get("github_id", "")
-            db_user = UserService.get_user_by_github_id(
+            existing_user = UserService.get_user_by_github_id(
                 github_id, db
             )
-            if db_user:
+            if existing_user:
                 return UserService.update(
-                    str(db_user.id),
+                    str(existing_user.id),
                     user_data,
                     db
                 )
+            raise ValueError("Failed to create user.")
     
     @staticmethod
     def fetch_all(db: Session) -> list[User]:
         return db.query(User).all()
     
     @staticmethod
-    def get_user_by_id(id: str, db: Session) -> User | None:
+    def get_user_by_id(id: str, db: Session) -> User:
         try:
             db_user = db.get(User, UUID(id))
             if not db_user:
@@ -58,27 +59,23 @@ class UserService:
         return db_user
     
     @staticmethod
-    def update(id: str, user_data: dict, db: Session) -> User | None:
-        try:
-            db_user = UserService.get_user_by_id(id, db)
-            
-            changed = False
-            user_data["updated_at"] = datetime.now(timezone.utc)
-            for key, value in user_data.items():
-                if value is None:
-                    continue
+    def update(id: str, user_data: dict, db: Session) -> User:
+        db_user = UserService.get_user_by_id(id, db)
+        
+        last_login_at = datetime.now(timezone.utc)
+        
+        for key, value in user_data.items():
+            if value is None:
+                continue
 
-                if hasattr(db_user, key) and getattr(db_user, key) != value:
-                    setattr(user_data, key, value)
-                    changed = True
+            if hasattr(db_user, key) and getattr(db_user, key) != value:
+                setattr(db_user, key, value)
 
-            if changed:
-                db.commit()
-                db.refresh(db_user)
+        setattr(db_user, "last_login_at", last_login_at)
+        db.commit()
+        db.refresh(db_user)
 
-            return db_user
-        except ValueError:
-            raise
+        return db_user
 
     @staticmethod
     def delete(id: str, db: Session) -> None:

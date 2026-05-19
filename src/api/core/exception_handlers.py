@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.api.core.exceptions import (
     ExternalApiError,
     InvalidIdError,
-    ProfileNotFoundError,
+    ResourceNotFoundError,
     DuplicateResourceError,
 )
 
@@ -29,9 +29,9 @@ def add_exception_handlers(app: FastAPI):
             status_code=400, content={"status": "error", "message": exc.detail}
         )
 
-    @app.exception_handler(ProfileNotFoundError)
+    @app.exception_handler(ResourceNotFoundError)
     def profile_not_found_error_handler(
-        request: Request, exc: ProfileNotFoundError
+        request: Request, exc: ResourceNotFoundError
     ):
         return JSONResponse(
             status_code=404, content={"status": "error", "message": exc.detail}
