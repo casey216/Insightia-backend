@@ -21,6 +21,7 @@ class UserService:
             db.refresh(db_user)
             return db_user
         except IntegrityError:
+            db.rollback()
             github_id = user_data.get("github_id", "")
             db_user = UserService.get_user_by_github_id(
                 github_id, db
