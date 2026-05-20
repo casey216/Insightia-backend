@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     GITHUB_USER_URL: str = ""
     GITHUB_TOKEN_URL: str = ""
     GITHUB_AUTHORIZE_URL: str = ""
-    GITHUB_EMAIL_URL:str = ""
+    GITHUB_EMAIL_URL: str = ""
 
     # Security
     SECRET_KEY: str = secrets.token_hex(32)

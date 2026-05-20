@@ -23,21 +23,17 @@ class UserService:
         except IntegrityError:
             db.rollback()
             github_id = user_data.get("github_id", "")
-            existing_user = UserService.get_user_by_github_id(
-                github_id, db
-            )
+            existing_user = UserService.get_user_by_github_id(github_id, db)
             if existing_user:
                 return UserService.update(
-                    str(existing_user.id),
-                    user_data,
-                    db
+                    str(existing_user.id), user_data, db
                 )
             raise ValueError("Failed to create user.")
-    
+
     @staticmethod
     def fetch_all(db: Session) -> list[User]:
         return db.query(User).all()
-    
+
     @staticmethod
     def get_user_by_id(id: str, db: Session) -> User:
         try:
@@ -47,23 +43,23 @@ class UserService:
             return db_user
         except ValueError:
             raise InvalidIdError("User")
-        
+
     @staticmethod
     def get_user_by_github_id(id: str, db: Session) -> User | None:
         db_user = db.query(User).filter_by(github_id=id).first()
         return db_user
-    
+
     @staticmethod
     def get_user_by_email(email: str, db: Session) -> User | None:
         db_user = db.query(User).filter_by(email=email).first()
         return db_user
-    
+
     @staticmethod
     def update(id: str, user_data: dict, db: Session) -> User:
         db_user = UserService.get_user_by_id(id, db)
-        
+
         last_login_at = datetime.now(timezone.utc)
-        
+
         for key, value in user_data.items():
             if value is None:
                 continue

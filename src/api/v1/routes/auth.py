@@ -38,7 +38,7 @@ async def login(request: Request):
         max_age=settings.CSRF_MAX_AGE_SECONDS,
         secure=False,
         httponly=True,
-        samesite='lax',
+        samesite="lax",
     )
 
     return response
@@ -49,30 +49,37 @@ async def handle_callback(
     request: Request,
     code: str,
     state: str,
-    db: Annotated[Session, Depends(get_db)]
-    ):
+    db: Annotated[Session, Depends(get_db)],
+):
     session_id = request.cookies.get("session_id")
     if not session_id:
         raise HTTPException(status_code=400, detail="session cookie missing")
-    
+
     if not code:
-        raise HTTPException(status_code=400, detail="Missing 'code' parameter from Github")
-    
+        raise HTTPException(
+            status_code=400, detail="Missing 'code' parameter from Github"
+        )
+
     if not state or not AuthService.verify_state_token(state, session_id):
-        raise HTTPException(status_code=403, detail="CSRF validation failed: invalid or expired state parameter")
-    
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "CSRF validation failed: invalid or expired state parameter"
+            ),
+        )
+
     token_data = await exchange_code_for_token(code)
     github_access_token = token_data.get("access_token")
     if not github_access_token:
         raise HTTPException(400, "GitHub OAuth failed")
-    
+
     user_data = await get_github_user(github_access_token)
-    
+
     db_user = UserService.create(user_data, db)
-    
+
     access_token = AuthService.create_jwt(
-        db_user.to_dict(),
-        settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        db_user.to_dict(), settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
     refresh_token = AuthService.create_refresh_token(db_user.id, db)
 
     response = RedirectResponse("/")
@@ -80,19 +87,19 @@ async def handle_callback(
     response.set_cookie(
         key="access_token",
         value=access_token,
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES*60,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         secure=False,
         httponly=True,
-        samesite='lax',
+        samesite="lax",
     )
 
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS*24*60*60,
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         secure=False,
         httponly=True,
-        samesite='lax',
+        samesite="lax",
     )
 
     return response

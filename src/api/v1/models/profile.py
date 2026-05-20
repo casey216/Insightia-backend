@@ -14,7 +14,9 @@ class Profile(BaseModel):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid7
     )
-    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False, unique=True
+    )
     gender: Mapped[str] = mapped_column(
         String(100), nullable=False, index=True
     )

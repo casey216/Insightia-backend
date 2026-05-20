@@ -15,28 +15,22 @@ async def exchange_code_for_token(code: str):
             },
         )
         return response.json()
-    
+
 
 async def get_github_user(token: str):
-    headers={
-        "Authorization": f"Bearer {token}"
-        }
+    headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient() as client:
-        user_res = await client.get(
-            settings.GITHUB_USER_URL,
-            headers=headers
-        )
+        user_res = await client.get(settings.GITHUB_USER_URL, headers=headers)
         email_res = await client.get(
-            settings.GITHUB_EMAIL_URL,
-            headers=headers
+            settings.GITHUB_EMAIL_URL, headers=headers
         )
         user = user_res.json()
         result = {
             "github_id": str(user.get("id")),
             "username": user.get("login"),
-            "avatar_url": user.get("avatar_url")
+            "avatar_url": user.get("avatar_url"),
         }
         for email in email_res.json():
             if email.get("verified") and email.get("primary"):
                 result["email"] = email.get("email")
-        return result    
+        return result
