@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import Boolean, String, DateTime, UUID, func
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from uuid_extensions import uuid7
 
 from .base import BaseModel
@@ -25,3 +25,5 @@ class User(BaseModel):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+    refresh_tokens = relationship("RefreshToken", back_populates="user")

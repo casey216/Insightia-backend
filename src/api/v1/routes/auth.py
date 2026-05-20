@@ -69,15 +69,18 @@ async def handle_callback(
     user_data = await get_github_user(github_access_token)
     
     db_user = UserService.create(user_data, db)
-    access_token = AuthService.create_jwt(db_user.to_dict(), 3)
-    refresh_token = AuthService.create_jwt(db_user.to_dict(), 5)
+    
+    access_token = AuthService.create_jwt(
+        db_user.to_dict(),
+        settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token = AuthService.create_refresh_token(db_user.id, db)
 
     response = RedirectResponse("/")
 
     response.set_cookie(
         key="access_token",
         value=access_token,
-        max_age=180,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES*60,
         secure=False,
         httponly=True,
         samesite='lax',
@@ -86,7 +89,7 @@ async def handle_callback(
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        max_age=300,
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS*24*60*60,
         secure=False,
         httponly=True,
         samesite='lax',

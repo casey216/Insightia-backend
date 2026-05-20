@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_hex(32)
     CSRF_MAX_AGE_SECONDS: int = 600
     ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
 
 settings = Settings()
