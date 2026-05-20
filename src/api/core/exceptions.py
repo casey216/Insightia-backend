@@ -12,26 +12,26 @@ class ExternalApiError(Exception):
 
 class InvalidIdError(Exception):
     """
-    Raised when a provided profile ID is invalid or malformed.
+    Raised when a provided resource ID is invalid or malformed.
 
     Args:
-        detail: Description of the invalid ID error.
+        name: Name of the resource.
     """
 
-    def __init__(self, detail: str = "Invalid profile id") -> None:
-        self.detail = detail
+    def __init__(self, name: str = "Resource") -> None:
+        self.detail = f"{name} ID is invalid."
 
 
-class ProfileNotFoundError(Exception):
+class ResourceNotFoundError(Exception):
     """
-    Raised when a requested profile cannot be found in the database.
+    Raised when a requested resource cannot be found in the database.
 
     Args:
-        detail: Description of the missing profile.
+        name: Name of the missing resource.
     """
 
-    def __init__(self, detail: str = "Profile not found") -> None:
-        self.detail = detail
+    def __init__(self, name: str = "Resource") -> None:
+        self.detail = f"{name} not found."
 
 
 class DuplicateResourceError(Exception):
@@ -44,3 +44,15 @@ class DuplicateResourceError(Exception):
 
     def __init__(self, name: str = "Resource") -> None:
         self.detail = f"{name} already exists!"
+
+
+class InvalidTokenError(Exception):
+    """
+    Raised when decoding an invalid token.
+
+    Args:
+        detail: Description of the error.
+    """
+
+    def __init__(self, detail: str = "Token is invalid") -> None:
+        self.detail = detail

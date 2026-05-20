@@ -51,7 +51,9 @@ class FilterParams(BaseModel):
     min_age: int | None = Field(default=None, gt=0)
     max_age: int | None = Field(default=None, gt=0)
     min_gender_probability: float | None = Field(default=None, ge=0.0, le=1.0)
-    min_country_probability: float | None = Field(default=None, ge=0.0, le=1.0)
+    min_country_probability: float | None = Field(
+        default=None, ge=0.0, le=1.0
+    )
 
 
 class SortParams(BaseModel):

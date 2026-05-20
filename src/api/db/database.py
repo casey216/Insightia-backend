@@ -68,7 +68,9 @@ def init_db(test: bool = False) -> None:
         return
 
     engine = get_db_engine(test=test)
-    SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    SessionLocal = sessionmaker(
+        bind=engine, autoflush=False, autocommit=False
+    )
 
 
 def get_db():
