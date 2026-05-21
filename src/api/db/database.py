@@ -52,6 +52,10 @@ def get_db_engine(test: bool = False) -> Engine:
     return create_engine(url, echo=False, **kwargs)
 
 
+def get_database_url():
+    return _build_database_url()[0]
+
+
 class Base(DeclarativeBase):
     pass
 
