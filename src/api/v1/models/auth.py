@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from uuid_extensions import uuid7
 
-from sqlalchemy import UUID, String, ForeignKey, DateTime, func, Boolean
+from sqlalchemy import UUID, String, ForeignKey, DateTime, func, Boolean, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.api.v1.models.base import BaseModel
@@ -29,3 +29,8 @@ class RefreshToken(BaseModel):
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user = relationship("User", back_populates="refresh_tokens")
+
+    __table_args__ = (
+        Index("ix_refresh_tokens_token_revoked", "token", "revoked"),
+        Index("ix_refresh_tokens_user_id_revoked", "user_id", "revoked")
+    )
