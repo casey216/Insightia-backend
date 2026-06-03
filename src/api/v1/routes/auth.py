@@ -1,7 +1,7 @@
 import secrets
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -112,13 +112,13 @@ async def refresh_access_token(
         if token
         else request.cookies.get("refresh_token", "")
     )
-    
+
     if not old_token:
         raise HTTPException(
             status_code=400,
             detail="Refresh token required"
         )
-    
+
     access_token, refresh_token = (
         AuthService.refresh_access_token(old_token, db)
     )
