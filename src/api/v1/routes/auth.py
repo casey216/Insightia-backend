@@ -1,10 +1,11 @@
 import secrets
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from ..schemas.auth import RefreshToken, RefreshTokenOut
 from ..services.auth import AuthService
 from ..services.github import exchange_code_for_token, get_github_user
 from ..services.user import UserService
@@ -16,11 +17,8 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
 @router.get("/github")
-async def login(request: Request):
-    session_id = request.cookies.get("session_id")
-    if not session_id:
-        session_id = secrets.token_urlsafe(32)
-
+async def login():
+    session_id = secrets.token_urlsafe(32)
     oauth_state = AuthService.create_state_token(session_id)
 
     url = (
@@ -31,7 +29,6 @@ async def login(request: Request):
     )
 
     response = RedirectResponse(url)
-
     response.set_cookie(
         key="session_id",
         value=session_id,
@@ -46,12 +43,11 @@ async def login(request: Request):
 
 @router.get("/github/callback")
 async def handle_callback(
-    request: Request,
-    code: str,
-    state: str,
     db: Annotated[Session, Depends(get_db)],
+    code: str | None = None,
+    session_id: Annotated[str | None, Cookie()] = None,
+    state: str | None = None
 ):
-    session_id = request.cookies.get("session_id")
     if not session_id:
         raise HTTPException(status_code=400, detail="session cookie missing")
 
@@ -103,3 +99,31 @@ async def handle_callback(
     )
 
     return response
+
+
+@router.post("/refresh", status_code=200, response_model=RefreshTokenOut)
+async def refresh_access_token(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    token: RefreshToken | None = None
+):
+    old_token = (
+        token.refresh_token
+        if token
+        else request.cookies.get("refresh_token", "")
+    )
+
+    if not old_token:
+        raise HTTPException(
+            status_code=400,
+            detail="Refresh token required"
+        )
+
+    access_token, refresh_token = (
+        AuthService.refresh_access_token(old_token, db)
+    )
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token
+    }
